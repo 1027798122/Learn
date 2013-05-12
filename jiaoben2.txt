@@ -1,0 +1,21 @@
+select name from sysobjects    
+where xtype='u' 
+
+
+select * from syscolumns  
+ where id=object_id(Orders) and xtype in (  
+ select xtype from systypes  
+ where name in ('varchar','nvarchar','char','nchar') --数据类型为字符型的字段  
+ )
+ 
+select c.name 
+from syscolumns c 
+join systypes t on c.xtype = t.xusertype and t.name in ('varchar','nvarchar','char','nchar')
+join sysobjects o on o.id=c.id    
+where o.xtype='U' and o.name='Orders' 
+
+select name from syscolumns  
+ where id=object_id('ORders') and xtype in (  
+ select xtype from systypes  
+ where name in ('varchar','nvarchar','char','nchar') --数据类型为字符型的字段  
+ )

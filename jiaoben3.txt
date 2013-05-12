@@ -1,0 +1,51 @@
+Create procedure Full_Search
+(
+   @Oldstring varchar(4000),
+   @Newstring varchar(4000)
+)  
+as 
+ 
+begin  
+declare @tbname varchar(100)   
+declare tbroy cursor  for select name from sysobjects    
+where xtype='u'   --第一个游标遍历所有的表  
+ 
+open tbroy  
+fetch next from tbroy into @tbname  
+while @@fetch_status=0 
+begin  
+    
+ declare @colname varchar(100)  
+ declare colroy cursor for select name from syscolumns  
+ where id=object_id(@tbname)--第二个游标是第一个游标的嵌套游标，遍历某个表的所有字段  
+ 
+ open colroy  
+ fetch next from colroy into @colname  
+ while @@fetch_status=0 
+ begin  
+   
+ declare @sql nvarchar(4000),@j int  
+ select @sql='select @i=count(1) from ' +quotename(@tbname) +'  where '+ quotename(@colname)+' like '+'''%'+@Oldstring+'%'''  
+ exec sp_executesql @sql,N'@i int output',@i=@j output   --输出满足条件表的记录数  
+ if @j>0  
+ begin  
+ declare @v varchar(8000)  
+ set @v='update '+quotename(@colname)+' set ' +quotename(@tbname) +'='+Replace(cast(quotename(@tbname) as varchar(8000)),@Oldstring,@Newstring) +' where '+ quotename(@colname)+' like '+'''%'+@Oldstring+'%'''  
+ exec(@v)  
+ end  
+ fetch next from colroy into @colname  
+ end         
+   
+ close colroy  
+ deallocate colroy  
+ 
+fetch next from tbroy into @tbname  
+end  
+close tbroy  
+deallocate tbroy  
+end  
+
+
+ 
+
+
