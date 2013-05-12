@@ -1,0 +1,16 @@
+BEGIN TRY  
+  BEGIN TRANSACTION    tran1  
+--Sql            
+  COMMIT TRANSACTION tran1  
+                 CLOSE acursor  
+                 DEALLOCATE acursor  
+END TRY  
+BEGIN CATCH  
+           IF @@TRANCOUNT > 0  
+        BEGIN  
+          CLOSE acursor  
+          DEALLOCATE acursor  
+          ROLLBACK  TRANSACTION tran1  
+          return  
+       END  
+END CATCH 
